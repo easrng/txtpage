@@ -7,12 +7,19 @@
     "webRequest", "webRequestBlocking", "*://*/*"
   ],
   "background": {
-    "scripts": ["background.js"]
+    "page": "background.html"
   },
   "browser_specific_settings": {
     "gecko": {
       "strict_min_version": "57.0a1"
     }
   },
-  "content_security_policy": "script-src 'self' blob:; object-src 'self';"
+  "content_security_policy": "script-src 'self' blob:; object-src 'self';",
+  "web_accessible_resources": [
+	"comlink.min.js"
+  ],
+  "sandbox": {
+    "pages": ["sandbox.html"],
+	"content_security_policy": "sandbox allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-scripts allow-top-navigation allow-top-navigation-by-user-activation; script-src * 'unsafe-inline' 'unsafe-eval'"
+  }
 }

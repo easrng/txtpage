@@ -4,7 +4,7 @@ export default (()=>{/* This Source Code Form is subject to the terms of the Moz
  *
  * Based on code from https://searchfox.org/mozilla-central/source/intl/locale/PluralForm.jsm, https://searchfox.org/mozilla-central/source/toolkit/components/reader/AboutReader.jsm, and https://searchfox.org/mozilla-central/source/toolkit/locales/en-US/chrome/global/aboutReader.properties
  */
-
+console.log("inpage js loaded")
 let gStrings = (() => {
   let strings = Object.fromEntries(
     `aboutReader.loading2=Loading…
@@ -465,7 +465,6 @@ let AboutReader = (() => {
       colorScheme,
       this._setColorSchemePref.bind(this)
     );
-    this._setColorSchemePref(colorScheme);
 
     let styleButton = this._doc.querySelector(".style-button");
     this._setButtonTip(styleButton, "aboutReader.toolbar.typeControls");
@@ -531,6 +530,7 @@ let AboutReader = (() => {
           gStrings.GetStringFromName("aboutReader.toolbar." + stringID)
         );
     }
+	this._setColorSchemePref(colorScheme);
     document.body.style.opacity=""
   };
 
@@ -1054,6 +1054,19 @@ let AboutReader = (() => {
 
       this._colorScheme = newColorScheme;
       bodyClasses.add(this._colorScheme);
+      for(let rule of document.styleSheets[0].cssRules) if(rule instanceof CSSStyleRule) for(let style of rule.style) {
+        let m = rule.style.getPropertyValue(style).match(/^url\(['"]?(data:image\/svg.+?)['"]?\)$/)
+        if(m) {
+          var request = new XMLHttpRequest();
+          request.open('GET', m[1], false);
+          request.send(null);
+          let svg = new DOMParser().parseFromString(request.responseText, "image/svg+xml")
+          let ele = document.querySelector(rule.selectorText);
+          if(!ele) console.log(rule.selectorText)
+          for(let e of svg.querySelectorAll("[fill]")) e.setAttribute("fill",rule.style.getPropertyValue("fill")||ele?getComputedStyle(ele).fill||e.getAttribute("fill"):e.getAttribute("fill"))
+          rule.style.setProperty(style, "url('data:image/svg+xml;base64,"+btoa(svg.documentElement.outerHTML)+"')")
+        }
+      }
     },
 
     // Pref values include "dark", "light", and "sepia"
