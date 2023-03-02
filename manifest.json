@@ -1,11 +1,9 @@
 {
   "manifest_version": 2,
   "name": "txtpage",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Adds Markdown and Gemtext support to your browser.",
-  "permissions": [
-    "webRequest", "webRequestBlocking", "*://*/*"
-  ],
+  "permissions": ["webRequest", "webRequestBlocking", "*://*/*"],
   "background": {
     "page": "background.html"
   },
@@ -14,15 +12,13 @@
       "strict_min_version": "57.0a1"
     }
   },
-  "content_security_policy": "script-src 'self' blob:; object-src 'self';",
-  "web_accessible_resources": [
-	"comlink.min.js"
-  ],
+  "content_security_policy": "script-src 'self'; object-src 'self';",
+  "web_accessible_resources": ["comlink.js"],
   "sandbox": {
     "pages": ["sandbox.html"],
-	"content_security_policy": "sandbox allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-scripts allow-top-navigation allow-top-navigation-by-user-activation; script-src * 'unsafe-inline' 'unsafe-eval'"
+    "content_security_policy": "sandbox allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-scripts allow-top-navigation allow-top-navigation-by-user-activation; script-src * 'unsafe-inline' 'unsafe-eval'"
   },
   "icons": {
-    "any": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjggMTI4Ij48cmVjdCB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgeD0iMCIgeT0iMCIgZmlsbD0iIzI4MmMzNCIgcnk9IjE2Ii8+PHBhdGggZmlsbD0iI2U1YzA3YiIgZD0ibTI4LjcgNTUuOCAzLjctNDQuNEgzOGwtMy43IDQ0LjR6TTEwLjkgNDQuNXYtNS4zSDQydjUuM3pNMTUgNTUuOGwzLjctNDQuNGg1LjVsLTMuNyA0NC40ek0xMC45IDI4di01LjNINDJWMjh6Ii8+PHBhdGggZmlsbD0iIzk4YzM3OSIgZD0ibTEwOC42IDQ3LjctOC44LTEyLjIgMy41LTMgMTAuNSAxMC44em0tMTQuMiAwLTUuMi00LjQgMTAuNS0xMC44IDMuNSAzem02LjMtMTEuNS0xNC41LTQuMSAyLjQtNi40IDEzLjcgNi4xek05OS4yIDM0bC0xLTE1aDYuN2wtMSAxNXptMy4xIDIuMi0xLjYtNC40IDEzLjctNiAyLjMgNi4zeiIvPjxwYXRoIGZpbGw9IiM2MWFmZWYiIGQ9Im05OC44IDcyLjMtNCA0IDcuMyA3LjRIMTAuOXY1LjhoOTYuOGw0LjUgNC43di41bC00LjUgNC42SDExdjUuOUgxMDJsLTcuMyA3LjQgNCA0IDE5LjUtMjAuM3YtMy44eiIvPjwvc3ZnPg=="
+    "128": "./icon.svg"
   }
 }

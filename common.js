@@ -1,42 +1,83 @@
-const marked = import("./marked.min.js").then(e=>e.default);
-const dioscuri = import("./dioscuri.min.js").then(e=>e.default).then(e=>e.buffer);
-const css = import("./css.js").then(e=>e.default)
-const inpage = import("./inpage.js").then(e=>e.default)
+const marked = import("./marked.js").then((e) => e.marked);
+const dioscuri = import("./dioscuri.js").then((e) => e.buffer);
+const css = import("./css.js").then((e) => e.default);
+const inpage = import("./inpage.js").then((e) => e.default);
 
-function validMime(mime){
-  let md, gmi
+const isMozzUs = (url) =>
+  url.startsWith("https://portal.mozz.us/gemini/") ||
+  url.startsWith("http://portal.mozz.us/gemini/");
+function getFormat(mime, url) {
+  let md, gmi;
+  const isText = mime == "text/plain" || mime.startsWith("text/plain;");
   try {
-    if(!((md=mime=="text/markdown"||mime.startsWith("text/markdown;"))||(gmi=mime=="text/gemini"||mime.startsWith("text/gemini;")))) return false
-  } catch (e) { return false }
-  return md?"md":gmi?"gmi":false
+    if (
+      !(
+        (md =
+          mime === "text/markdown" ||
+          mime.startsWith("text/markdown;") ||
+          (isText && (url.endsWith(".md") || url.endsWith(".markdown")))) ||
+        (gmi =
+          mime === "text/gemini" ||
+          mime.startsWith("text/gemini;") ||
+          (isText && (url.endsWith(".gmi") || isMozzUs(url))))
+      )
+    )
+      return false;
+  } catch (e) {
+    return false;
+  }
+  return md ? "md" : gmi ? "gmi" : false;
 }
 
-async function toHTML(mime, str, extraHead){
-  let title;
-  let format=validMime(mime)
-  if(format=="md"){
-    (await marked).use({renderer:{heading(e, t, u, n) {
-      if(t==1 && !title) {
-        let b=new DOMParser().parseFromString(e,"text/html").body;
-        b.innerText=b.innerText.trim()
-        title=b.innerHTML
-      }
-      return '<h' + t + ' id="' + n.slug(u) + '">' + e + '</h' + t + '>\n'
-    }}})
+async function toHTML(mime, str, extraHead, url) {
+  let title = "";
+  let format = getFormat(mime, url);
+  if (format == "md") {
+    (await marked).use({
+      renderer: {
+        heading(e, t, u, n) {
+          if (t == 1 && !title) {
+            let b = new DOMParser().parseFromString(e, "text/html").body;
+            b.innerText = b.innerText.trim();
+            title = b.innerHTML;
+          }
+          return "<h" + t + ' id="' + n.slug(u) + '">' + e + "</h" + t + ">\n";
+        },
+      },
+    });
     str = (await marked)(str);
-  }else if(format=="gmi"){
-    str = (await dioscuri)(str, null, null, t=>{
-      if(title) return t;
-      let i=t.findIndex(e=>e.type=="headingSequence"&&e.value=="#")
-      if(i==-1) return t;
-      try{
-        title=t.slice(i).find(e=>e.type=="headingText").value;
-      }catch(e){}
-      return t;
-    })
+  } else if (format == "gmi") {
+    str = new DOMParser().parseFromString(
+      "<body>" + (await dioscuri)(str) + "</body>",
+      "text/html"
+    );
+    title = str.querySelector("h1") || title;
+    if (title) title = title.textContent.trim();
+    const baseURL = isMozzUs(url)
+      ? "gemini://" +
+        decodeURIComponent(new URL(url).pathname.slice("/gemini/".length))
+      : url;
+    for (const link of str.querySelectorAll("a")) {
+      const url = new URL(link.getAttribute("href"), baseURL);
+      if (url.protocol === "gemini:") {
+        const [host, path] = url.href
+          .match(/^gemini:(?:\/\/?)?([^\/]+)(?:\/(.*))?$/)
+          .slice(1);
+        link.href =
+          "https://portal.mozz.us/gemini/" +
+          host +
+          "/" +
+          encodeURI(path) +
+          "?raw=1";
+      } else {
+        link.href = url;
+      }
+    }
+    str = str.body.innerHTML;
   } else {
-    str = '<h1 id="error">Error</h1><p>There was an error loading this page. Please check the console for errors and report them <a href="https://github.com/easrng/txtpage/issues">here</a>.</p>'
-    title = "Error"
+    str =
+      '<h1 id="error">Error</h1><p>There was an error loading this page. Please check the console for errors and report them <a href="https://github.com/easrng/txtpage/issues">here</a>.</p>';
+    title = "Error";
   }
   return `
 <!DOCTYPE html>
@@ -46,7 +87,7 @@ async function toHTML(mime, str, extraHead){
   <meta name="viewport" content="width=device-width, user-scalable=0" />
   <style>${await css}</style>
   <title>${title}</title>
-  ${extraHead||""}
+  ${extraHead || ""}
 </head>
 <body>
   <script>document.body.style.opacity="0"</script>
@@ -92,5 +133,5 @@ async function toHTML(mime, str, extraHead){
   </div>
   <script>${await inpage}</script>
 </body>
-</html>`
+</html>`;
 }

@@ -1,22 +1,46 @@
-<!doctype html>
-<meta content="text/html; charset=UTF-8" http-equiv="content-type">
-<script src="comlink.min.js"></script>
+<!DOCTYPE html>
+<meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+<script src="comlink.js"></script>
 <script>
-(async()=>{
-  let o=Comlink.wrap({addEventListener: window.addEventListener.bind(window), removeEventListener: window.removeEventListener.bind(window), postMessage: m=>window.parent.postMessage(m, "*")})
-  Object.defineProperty(window, "localStorage", {value: {
-    _data       : await o.getAll(),
-    setItem     : function(id, val) { o.localStorage.setItem(id, val); return this._data[id] = String(val); },
-    getItem     : function(id) { return this._data.hasOwnProperty(id) ? this._data[id] : undefined; },
-    removeItem  : function(id) { o.localStorage.removeItem(id); return delete this._data[id]; },
-    clear       : function() { o.localStorage.clear(); return this._data = {}; }
-  }})
-  document.documentElement.innerText=""
-  document.documentElement.append(...document.adoptNode(new DOMParser().parseFromString(decodeURIComponent(location.search.slice(1)), "text/html").documentElement).children)
-  for(s of [...document.querySelectorAll("script")]){
-    let newScript = document.createElement("script")
-    newScript.append(...s.childNodes)
-    s.replaceWith(newScript)
-  }
-  })()
+  (async () => {
+    let o = Comlink.wrap({
+      addEventListener: window.addEventListener.bind(window),
+      removeEventListener: window.removeEventListener.bind(window),
+      postMessage: (m) => window.parent.postMessage(m, "*"),
+    });
+    Object.defineProperty(window, "localStorage", {
+      value: {
+        _data: await o.getAll(),
+        setItem: function (id, val) {
+          o.localStorage.setItem(id, val);
+          return (this._data[id] = String(val));
+        },
+        getItem: function (id) {
+          return this._data.hasOwnProperty(id) ? this._data[id] : undefined;
+        },
+        removeItem: function (id) {
+          o.localStorage.removeItem(id);
+          return delete this._data[id];
+        },
+        clear: function () {
+          o.localStorage.clear();
+          return (this._data = {});
+        },
+      },
+    });
+    document.documentElement.innerText = "";
+    document.documentElement.append(
+      ...document.adoptNode(
+        new DOMParser().parseFromString(
+          decodeURIComponent(location.search.slice(1)),
+          "text/html"
+        ).documentElement
+      ).children
+    );
+    for (s of [...document.querySelectorAll("script")]) {
+      let newScript = document.createElement("script");
+      newScript.append(...s.childNodes);
+      s.replaceWith(newScript);
+    }
+  })();
 </script>
