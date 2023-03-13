@@ -3,7 +3,10 @@ export default (() => {
    * License, v. 2.0. If a copy of the MPL was not distributed with this
    * file, You can obtain one at http://mozilla.org/MPL/2.0/.
    *
-   * Based on code from https://searchfox.org/mozilla-central/source/intl/locale/PluralForm.jsm, https://searchfox.org/mozilla-central/source/toolkit/components/reader/AboutReader.jsm, and https://searchfox.org/mozilla-central/source/toolkit/locales/en-US/chrome/global/aboutReader.properties
+   * Based on code from:
+   *  - https://searchfox.org/mozilla-central/source/intl/locale/PluralForm.jsm
+   *  - https://searchfox.org/mozilla-central/source/toolkit/components/reader/AboutReader.jsm
+   *  - https://searchfox.org/mozilla-central/source/toolkit/locales/en-US/chrome/global/aboutReader.properties
    */
   console.log("inpage js loaded");
   let gStrings = (() => {

@@ -1,5 +1,5 @@
 const marked = import("../lib/marked.js").then((e) => e.marked);
-const dioscuri = import("../lib/dioscuri.js").then((e) => e.buffer);
+const dioscuri = import("../lib/dioscuri/buffer.development.bundle.js").then((e) => e.buffer);
 const css = import("./css.js").then((e) => e.default);
 const inpage = import("./inpage.js").then((e) => e.default);
 

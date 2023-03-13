@@ -1,0 +1,3 @@
+lib/marked.js is marked@4.2.12/lib/marked.esm.js from npm
+lib/dioscuri/buffer.development.bundle.js is from https://esm.sh/v111/dioscuri@1.3.0/es2022/lib/buffer.development.bundle.js
+lib/inpage.js is based on manually modified copies of https://searchfox.org/mozilla-central/source/intl/locale/PluralForm.jsm, https://searchfox.org/mozilla-central/source/toolkit/components/reader/AboutReader.jsm, and https://searchfox.org/mozilla-central/source/toolkit/locales/en-US/chrome/global/aboutReader.properties
