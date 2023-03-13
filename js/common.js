@@ -1,5 +1,5 @@
-const marked = import("./marked.js").then((e) => e.marked);
-const dioscuri = import("./dioscuri.js").then((e) => e.buffer);
+const marked = import("../lib/marked.js").then((e) => e.marked);
+const dioscuri = import("../lib/dioscuri.js").then((e) => e.buffer);
 const css = import("./css.js").then((e) => e.default);
 const inpage = import("./inpage.js").then((e) => e.default);
 
@@ -29,7 +29,7 @@ function getFormat(mime, url) {
   return md ? "md" : gmi ? "gmi" : false;
 }
 
-async function toHTML(mime, str, extraHead, url) {
+window.toHTML = async function toHTML(mime, str, extraHead, url) {
   let title = "";
   let format = getFormat(mime, url);
   if (format == "md") {
@@ -39,7 +39,7 @@ async function toHTML(mime, str, extraHead, url) {
           if (t == 1 && !title) {
             let b = new DOMParser().parseFromString(e, "text/html").body;
             b.innerText = b.innerText.trim();
-            title = b.innerHTML;
+            title = b.innerText;
           }
           return "<h" + t + ' id="' + n.slug(u) + '">' + e + "</h" + t + ">\n";
         },
@@ -61,7 +61,7 @@ async function toHTML(mime, str, extraHead, url) {
       const url = new URL(link.getAttribute("href"), baseURL);
       if (url.protocol === "gemini:") {
         const [host, path] = url.href
-          .match(/^gemini:(?:\/\/?)?([^\/]+)(?:\/(.*))?$/)
+          .match(/^gemini:(?:\/\/?)?([^/]+)(?:\/(.*))?$/)
           .slice(1);
         link.href =
           "https://portal.mozz.us/gemini/" +
@@ -86,7 +86,7 @@ async function toHTML(mime, str, extraHead, url) {
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
   <meta name="viewport" content="width=device-width, user-scalable=0" />
   <style>${await css}</style>
-  <title>${title}</title>
+  <title>${new Option(title).innerHTML}</title>
   ${extraHead || ""}
 </head>
 <body>

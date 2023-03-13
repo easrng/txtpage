@@ -1,9 +1,9 @@
+const browser = window.browser;
 const requests = {};
 function filterToStream(filter) {
   let events = [];
   let pending = null;
   function pushOrPending(obj) {
-    console.log(pending, obj, [...events, obj]);
     if (pending) {
       pending(obj);
     } else {
@@ -27,7 +27,6 @@ function filterToStream(filter) {
           };
         });
       }
-      console.log(e);
       if (e.data) yield e.data.data;
       if (e.error) throw e.error;
       if (e.stop) return;
@@ -35,25 +34,22 @@ function filterToStream(filter) {
   })();
 }
 
-if (typeof browser.webRequest.filterResponseData == "function") {
-  function onBeforeRequest(details) {
-    console.log("onBeforeRequest", details.requestId);
-    if (requests[details.requestId]) return;
-    const filter = browser.webRequest.filterResponseData(details.requestId);
-    const stream = filterToStream(filter);
-    requests[details.requestId] = { filter, stream };
-    return {};
-  }
-  browser.webRequest.onBeforeRequest.addListener(
-    onBeforeRequest,
-    { urls: ["*://" + "*/" + "*"], types: ["main_frame"] },
-    ["blocking"]
-  );
+function onBeforeRequest(details) {
+  console.log("onBeforeRequest", details.requestId);
+  if (requests[details.requestId]) return;
+  const filter = browser.webRequest.filterResponseData(details.requestId);
+  const stream = filterToStream(filter);
+  requests[details.requestId] = { filter, stream };
+  return {};
 }
+browser.webRequest.onBeforeRequest.addListener(
+  onBeforeRequest,
+  { urls: ["*://" + "*/" + "*"], types: ["main_frame"] },
+  ["blocking"]
+);
 async function returnAsIs(filter, stream, requests, details) {
   if (!filter || !stream) return;
   for await (const i of stream) filter.write(i);
-  console.log("stream done");
   filter.close();
   delete requests[details.requestId];
 }
@@ -71,8 +67,7 @@ function onHeadersReceived(details) {
   let stream =
     requests[details.requestId] && requests[details.requestId].stream;
   if (
-    (typeof browser.webRequest.filterResponseData == "function" &&
-      !requests[details.requestId]) ||
+    !requests[details.requestId] ||
     (!(
       (details.statusCode >= 200 && details.statusCode < 300) ||
       details.statusCode >= 400
@@ -90,17 +85,7 @@ function onHeadersReceived(details) {
       value: "application/octet-stream",
     });
   mime = cth.value.toLowerCase();
-  format = getFormat(mime, details.url);
-  if (typeof browser.webRequest.filterResponseData != "function") {
-    if (format)
-      return {
-        redirectUrl:
-          browser.runtime.getURL("viewer.html") +
-          "?url=" +
-          encodeURIComponent(details.url),
-      };
-    return;
-  }
+  format = window.getFormat(mime, details.url);
   handler: {
     if (!format) break handler;
     requests[details.requestId].handled = true;
@@ -108,10 +93,9 @@ function onHeadersReceived(details) {
     (async () => {
       const data = [];
       for await (const i of stream) data.push(i);
-      console.log("stream done");
       let blob = new Blob(data, { type: mime });
       let str = await blob.text();
-      filter.write(encoder.encode(await toHTML(mime, str, "", details.url)));
+      filter.write(encoder.encode(await window.toHTML(mime, str, "", details.url)));
       filter.close();
     })();
     delete requests[details.requestId];
